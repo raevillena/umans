@@ -2,14 +2,11 @@ import express from 'express';
 import { initDB } from './models/index.js';
 import path from 'path';
 import {fileURLToPath} from 'url'
-import users from './routes/users.js';
+import { usersRoute, appsRoute, roleRoute, authRoute} from './routes/index.js';
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
 import notFound from './middleware/notFound.js';
 
-
-//Initialize database
-initDB();
 
 //Get env from .env file
 const port = process.env.PORT || 3000;
@@ -32,11 +29,17 @@ app.use(logger);
 app.use(express.static(path.join(__dirname, 'public')));
 
 //Routes
-app.use('/api/users', users);
+app.use('/api/users', usersRoute);
+app.use('/api/apps', appsRoute);
+app.use('/api/roles', roleRoute);
+app.use('/api/auth', authRoute);
 
 //error handler middleware
 app.use(notFound);
 app.use(errorHandler);
+
+//Initialize database
+initDB();
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

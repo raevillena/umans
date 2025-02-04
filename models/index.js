@@ -1,5 +1,16 @@
 import sequelize from '../config/database.js';
 
+import User from './userModel.js';
+import Apps from './appsModel.js';
+import Roles from './rolesModel.js';
+import RefreshToken from './refreshTokenModel.js';
+ 
+Apps.belongsToMany(User, {
+    through: Roles,
+    name: 'permissions'
+})
+
+
 export const initDB = async () => {
     try {
         await sequelize.authenticate();
@@ -10,3 +21,7 @@ export const initDB = async () => {
         console.error('Unable to connect to the database:', error);
     }
 };
+
+export {
+    User, Apps, Roles, RefreshToken
+}

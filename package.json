@@ -13,7 +13,9 @@
   "description": "",
   "dependencies": {
     "@sequelize/mariadb": "^7.0.0-alpha.44",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "redis": "^4.7.0"
   }
 }
