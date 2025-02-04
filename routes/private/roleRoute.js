@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import {getRoles, addRole, updateRole, deleteRole } from '../controllers/rolesController.js';
+import {getRoles, addRole, updateRole, deleteRole } from '../../controllers/rolesController.js';
 
 
 //GET all roles

@@ -1,7 +1,7 @@
-import usersRoute from './usersRoute.js';
-import appsRoute from './appsRoute.js';
-import roleRoute from './roleRoute.js';
-import authRoute from './authRoute.js'
+import usersRoute from './private/usersRoute.js';
+import appsRoute from './private/appsRoute.js';
+import roleRoute from './private/roleRoute.js';
+import authRoute from './public/authRoute.js'
 
 export {
     usersRoute,

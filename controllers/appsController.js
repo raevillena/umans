@@ -5,15 +5,20 @@ import {Apps} from '../models/index.js';
 // GET /api/apps
 export const getApps = async (req, res, next) => {
     try {
+        //get all if limit is not defined and show only the active ones
         const limit = parseInt(req.query.limit)
         if(isNaN(limit)) {
             const apps = await Apps.findAll({where:{isActive: true}});
             return res.json(apps);
         }
+
+        //get all with limits
         if(!isNaN(limit) && limit > 0) {
             const apps = await Apps.findAll({where:{isActive: true}, limit: limit});
             return res.json(apps);
         }
+
+        //if limit is defined but lower that 0 then send invalid result
         res.status(400).send('Invalid limit');
     } catch (error) {
         error.status = 400;
@@ -24,6 +29,7 @@ export const getApps = async (req, res, next) => {
 // create new app registry
 // POST /api/apps
 export const createApp = async (req, res, next) => {
+    //validate if there is a name 
     if(!req.body.name){
         const error = new Error('Please include a name');
         error.status = 400;

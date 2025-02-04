@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import {getApps, createApp, updateApp, deleteApp } from '../controllers/appsController.js';
+import {getApps, createApp, updateApp, deleteApp } from '../../controllers/appsController.js';
 
 
 //GET all users
