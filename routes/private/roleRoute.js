@@ -13,7 +13,7 @@ router.post('/', addRole);
 router.put('/:id', updateRole);
 
 //Delete user by id/username
-router.get('/:id', deleteRole);
+router.delete('/:id', deleteRole);
 
 
 

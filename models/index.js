@@ -4,6 +4,7 @@ import User from './userModel.js';
 import Apps from './appsModel.js';
 import Roles from './rolesModel.js';
 import RefreshToken from './refreshTokenModel.js';
+import GoogleUser from './googleModel.js';
  
 Apps.belongsToMany(User, {
     through: Roles,
@@ -23,5 +24,5 @@ export const initDB = async () => {
 };
 
 export {
-    User, Apps, Roles, RefreshToken
+    User, Apps, Roles, RefreshToken, GoogleUser
 }

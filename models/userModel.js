@@ -44,6 +44,10 @@ User.init({
         len: [8, 100] // password length
       }
     },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     role: {
       type: DataTypes.ENUM('admin', 'user'),
       allowNull: false,

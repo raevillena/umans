@@ -14,6 +14,6 @@ router.post('/', createApp);
 router.put('/:id', updateApp);
 
 //Delete user by id/username
-router.get('/:id', deleteApp);
+router.delete('/:id', deleteApp);
 
 export default router;

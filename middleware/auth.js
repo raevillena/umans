@@ -1,4 +1,4 @@
-import redisClient from "../config/redis";
+import redisClient from "../config/redis.js";
 
 
 const authenticateSession = async (req, res, next) => {
@@ -20,7 +20,7 @@ const authenticateSession = async (req, res, next) => {
         error.status = 401;
         return next(error);
     }
-    
+
     req.userId = userId;
     next();
 }

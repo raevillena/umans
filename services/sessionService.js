@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import redisClient from '../config/redis.js';
 import RefreshToken from '../models/refreshTokenModel.js';
 
-async function generateTokens(userId) {
+export const generateTokens = async (userId) => {
   const accessToken = crypto.randomBytes(32).toString('hex');
   const refreshToken = crypto.randomBytes(64).toString('hex');
 
@@ -18,7 +18,7 @@ async function generateTokens(userId) {
   return { accessToken, refreshToken };
 }
 
-async function verifyToken(token, type) {
+export const verifyToken = async (token, type) => {
   if (type === 'access') {
     return await redisClient.get(`access:${token}`);
   } else if (type === 'refresh') {
@@ -26,12 +26,10 @@ async function verifyToken(token, type) {
   }
 }
 
-async function revokeToken(token, type) {
+export const revokeToken = async (token, type) => {
   if (type === 'access') {
     await redisClient.del(`access:${token}`);
   } else if (type === 'refresh') {
     await RefreshToken.destroy({ where: { token } });
   }
 }
-
-export { generateTokens, verifyToken, revokeToken };
