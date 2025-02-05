@@ -1,5 +1,9 @@
-import User from '../models/userModel.js';
+import { User } from '../models/index.js';
 import { generateTokens, revokeToken } from '../services/sessionService.js'
+import sendEmail from '../services/emailService.js';
+
+const envResetTokenExpiry = process.env.PASSWD_RESET_TOKEN_EXPIRY || 3600000;
+const apiUrl = process.env.API_URL || 'localhost:3001';
 
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
@@ -23,7 +27,7 @@ export const login = async (req, res, next) => {
             return next(error);
         }
 
-        // Validate password
+        // Validate password, check password if matched when unhashed
         const isValidPassword = await user.validatePassword(password);
         if (!isValidPassword) {
             const error = new Error('Validation Failed //dev mode change to real one');
@@ -47,6 +51,29 @@ export const login = async (req, res, next) => {
     }
 }
 
+// create new user
+// POST /api/users
+export const register = async (req, res, next) => {
+    if(!req.body.username){
+        const error = new Error('Please include a name');
+        error.status = 400;
+        return next(error);
+    }
+
+    try {
+        const user = await User.create(req.body);
+        const userResponse = user.toJSON();
+        delete userResponse.password;
+        res.status(201).json(userResponse);
+    } catch (error) {
+        //const error2 = new Error('creating a user failed');
+        error.status = 400;
+        return next(error);
+    }
+}
+
+// logout user
+// POST /api/auth/logout
 export const logout = async (req, res, next) => {
     try{
         const { access_token, refresh_token } = req.body;
@@ -59,6 +86,8 @@ export const logout = async (req, res, next) => {
     }
 }
 
+// reissue refresh token
+// POST /api/auth/refresh
 export const refresh = async (req, res, next) => {
     //get and check if refresh token is present, if not then return with error
     const { refresh_token } = req.body;
@@ -79,3 +108,57 @@ export const refresh = async (req, res, next) => {
     const { accessToken } = await generateTokens(storedToken.userId);
     res.status(200).json({ access_token: accessToken });
 }
+
+export const requestPasswdReset = async (req, res) => {
+    //get email from body
+    const { email } = req.body;
+  
+    try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        return res.status(404).json({ msg: 'User not found' });
+      }
+  
+      // Generate a secure reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = Date.now() + envResetTokenExpiry; // Token valid for 1 hour
+  
+      // Save token in database
+      await user.update({ resetToken, resetTokenExpiry });
+  
+      // Send the reset email
+      const resetLink = `${apiUrl}/reset-password/${resetToken}`; //send page of password reset instead this one is direct to the api 
+      await sendEmail(user.email, 'Password Reset Request', `Click this link to reset your password: ${resetLink}`);
+  
+      return res.status(200).json({ message: 'Password reset link sent to email' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
+  export const resetPasswd = async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    try {
+      const user = await User.findOne({ 
+        where: { resetToken: token, resetTokenExpiry: { [Op.gt]: Date.now() } }
+      });
+  
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
+      }
+  
+      // Update password and clear reset token
+      await user.update({
+        password: newPassword, // Sequelize hooks will hash it
+        resetToken: null,
+        resetTokenExpiry: null
+      });
+  
+      return res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }

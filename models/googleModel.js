@@ -1,6 +1,7 @@
 import { DataTypes, Model } from '@sequelize/core';
 import sequelize from '../config/database.js';
 
+import User from './userModel.js';
 
 class GoogleUser extends Model {}
 
@@ -20,7 +21,11 @@ GoogleUser.init({
         unique: true,
         validate: {
             isEmail: true
-        }
+        },
+        references: {
+            model: User,
+            key: 'email',
+          },
     },
     googleId: {
         type: DataTypes.STRING,

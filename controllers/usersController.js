@@ -1,5 +1,5 @@
 // Description: All user related routes are defined here
-import {User, Apps} from '../models/index.js';
+import {User, Apps, GoogleUser} from '../models/index.js';
 
 // get all users
 // GET /api/users
@@ -30,9 +30,14 @@ export const getUserByUsername = async (req, res, next) => {
                 username: req.params.username,
                 isActive: true,
             },
-            include: [{
-                model: Apps
-            }]
+            include: [
+                {
+                    model: Apps
+                },
+                {
+                    model: GoogleUser
+                }
+            ],
         });
         if(!user){
             const error = new Error(`User with id ${req.params.username} not found`);
@@ -46,26 +51,6 @@ export const getUserByUsername = async (req, res, next) => {
     }
 };
 
-// create new user
-// POST /api/users
-export const createUser = async (req, res, next) => {
-    if(!req.body.username){
-        const error = new Error('Please include a name');
-        error.status = 400;
-        return next(error);
-    }
-
-    try {
-        const user = await User.create(req.body);
-        const userResponse = user.toJSON();
-        delete userResponse.password;
-        res.status(201).json(userResponse);
-    } catch (error) {
-        //const error2 = new Error('creating a user failed');
-        error.status = 400;
-        return next(error);
-    }
-}
 
 // update user by id
 // PUT /api/users/:id
@@ -84,6 +69,28 @@ export const updateUser = async (req, res, next) => {
         error.status = 400;
         return next(error);
     }
+}
+
+// change password by email
+// POST /api/users/:email
+
+export const changePassword = async (req, res, next) => {
+
+  const { email, newPassword } = req.body;
+  try {
+    // Check if user exists
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update password (Sequelize hook will hash it automatically)
+    await user.update({ password: newPassword });
+
+    return res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 }
 
 // update user by id

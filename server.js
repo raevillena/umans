@@ -2,7 +2,7 @@ import express from 'express';
 import { initDB } from './models/index.js';
 import path from 'path';
 import {fileURLToPath} from 'url'
-import { usersRoute, appsRoute, roleRoute, authRoute, googleRoute } from './routes/index.js';
+import { usersRoute, appsRoute, roleRoute, authRoute, googleRoute, userTypesRoute } from './routes/index.js';
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
 import notFound from './middleware/notFound.js';
@@ -34,6 +34,7 @@ app.use('/api/apps', appsRoute);
 app.use('/api/roles', roleRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/auth/google', googleRoute);
+app.use('/api/type', userTypesRoute);
 
 //error handler middleware
 app.use(notFound);

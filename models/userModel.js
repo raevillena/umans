@@ -2,7 +2,6 @@ import { DataTypes, Model } from '@sequelize/core';
 import bcrypt from 'bcrypt'
 import sequelize from '../config/database.js';
 
-
 class User extends Model {
   async validatePassword(password){
     return bcrypt.compare(password, this.password)
@@ -17,7 +16,6 @@ User.init({
     },
     username: {
       type: DataTypes.STRING,
-      primaryKey: true,
       allowNull: false,
       unique: true,
     },
@@ -44,14 +42,22 @@ User.init({
         len: [8, 100] // password length
       }
     },
-    googleId: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     role: {
       type: DataTypes.ENUM('admin', 'user'),
       allowNull: false,
       defaultValue: 'user',
+    },
+    mobileNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    resetToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    resetTokenExpiry: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,

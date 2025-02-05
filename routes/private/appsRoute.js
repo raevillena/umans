@@ -6,7 +6,6 @@ import {getApps, createApp, updateApp, deleteApp } from '../../controllers/appsC
 //GET all users
 router.get('/', getApps);
 
-
 //POST new user /create new user
 router.post('/', createApp);
 

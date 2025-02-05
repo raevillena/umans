@@ -5,12 +5,15 @@ import Apps from './appsModel.js';
 import Roles from './rolesModel.js';
 import RefreshToken from './refreshTokenModel.js';
 import GoogleUser from './googleModel.js';
+import userTypes from './userTypesModel.js';
  
 Apps.belongsToMany(User, {
     through: Roles,
     name: 'permissions'
 })
 
+User.hasOne(GoogleUser, { foreignKey: 'email', sourceKey: 'email' });
+GoogleUser.belongsTo(User, { foreignKey: 'email', targetKey: 'email' });
 
 export const initDB = async () => {
     try {
@@ -24,5 +27,5 @@ export const initDB = async () => {
 };
 
 export {
-    User, Apps, Roles, RefreshToken, GoogleUser
+    User, Apps, Roles, RefreshToken, GoogleUser, userTypes
 }
