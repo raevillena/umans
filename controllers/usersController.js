@@ -1,5 +1,5 @@
 // Description: All user related routes are defined here
-import {User, Apps, GoogleUser} from '../models/index.js';
+import {User, Apps, GoogleUser, Roles, UserTypes} from '../models/index.js';
 
 // get all users
 // GET /api/users
@@ -30,13 +30,20 @@ export const getUserByUsername = async (req, res, next) => {
                 username: req.params.username,
                 isActive: true,
             },
+            attributes: ['id', 'username', 'email', 'role', 'mobileNo'],
             include: [
                 {
-                    model: Apps
+                    model: Apps,
+                    attributes: ['name'],
+                    through:{
+                        model:Roles,
+                        attributes: ['userType']
+                    }
                 },
                 {
-                    model: GoogleUser
-                }
+                    model: GoogleUser,
+                    attributes: ['email', 'googleId']
+                },
             ],
         });
         if(!user){

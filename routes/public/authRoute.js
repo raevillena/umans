@@ -1,10 +1,13 @@
 import express from 'express';
 const router = express.Router();
-import { login, register, logout, refresh, requestPasswdReset, resetPasswd} from '../../controllers/authController.js';
-import { validateRegister, validateLogin, validateRefreshToken } from '../../middleware/validation.js';
+import { superLogin, login, register, logout, refresh, requestPasswdReset, resetPasswd} from '../../controllers/authController.js';
+import { validateRegister, validateLogin, validateSuperLogin, validateRefreshToken } from '../../middleware/validation.js';
 
 //POST login
 router.post('/login', validateLogin, login);
+
+//POST login
+router.post('/superLogin', validateSuperLogin, superLogin);
 
 //POST new user /create new user
 router.post('/register', validateRegister, register);

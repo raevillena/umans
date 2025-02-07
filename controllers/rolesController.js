@@ -1,11 +1,13 @@
 import {Roles} from '../models/index.js';
-
+import {User, Apps, GoogleUser, UserTypes} from '../models/index.js';
 
 // get app list
 // GET /api/apps
 export const getRoles = async (req, res, next) => {
     try {
-        const role = await Roles.findAll({where:{isActive: true}});
+        const role = await Roles.findAll({
+            where:{isActive: true},
+        });
         return res.json(role);
     } catch (error) {
         error.status = 400;
@@ -16,6 +18,7 @@ export const getRoles = async (req, res, next) => {
 // create new app registry
 // POST /api/roles
 export const addRole = async (req, res, next) => {
+    console.log(req.body)
     if(!req.body.userId){
         const error = new Error('Please select properly');
         error.status = 400;
@@ -24,6 +27,7 @@ export const addRole = async (req, res, next) => {
 
     try {
         const role = await Roles.create(req.body);
+        console.log(role)
         res.status(201).json(role);
     } catch (error) {
         //const error2 = new Error('creating a user failed');

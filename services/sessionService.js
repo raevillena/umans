@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import redisClient from '../config/redis.js';
 import RefreshToken from '../models/refreshTokenModel.js';
 
-export const generateTokens = async (userId) => {
+export const generateTokens = async (id, role, appId) => {
   const accessToken = crypto.randomBytes(32).toString('hex');
   const refreshToken = crypto.randomBytes(64).toString('hex');
 
@@ -10,10 +10,10 @@ export const generateTokens = async (userId) => {
   const refreshTTL = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days expiry
 
   // Store access token in Redis
-  await redisClient.set(`access:${accessToken}`, userId, 'EX', accessTTL);
+  await redisClient.set(`access:${accessToken}`, JSON.stringify({id, role, appId}), {'EX':accessTTL});
 
   // Store refresh token in MariaDB
-  await RefreshToken.create({ token: refreshToken, userId, expiresAt: refreshTTL });
+  await RefreshToken.create({ token: refreshToken, userId: id, appId: appId, expiresAt: refreshTTL });
 
   return { accessToken, refreshToken };
 }

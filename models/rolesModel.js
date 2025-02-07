@@ -7,8 +7,15 @@ import Apps from './appsModel.js';
 class Roles extends Model {}
 
 Roles.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     appsId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: false, 
         references: {
           model: Apps,
           key: 'id',
@@ -16,6 +23,7 @@ Roles.init({
     },
     userId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
           model: User,
           key: 'id',

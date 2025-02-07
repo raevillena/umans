@@ -28,6 +28,14 @@ export const validateRegister = [
 export const validateLogin = [
     body('email').isEmail().withMessage('Invalid email format'),
     body('password').notEmpty().withMessage('Password is required'),
+    body('appId').isDecimal().withMessage('Which app are you trying to login for?'),
+    validateRequest
+];
+
+// Validation rules for login
+export const validateSuperLogin = [
+    body('email').isEmail().withMessage('Invalid email format'),
+    body('password').notEmpty().withMessage('Password is required'),
     validateRequest
 ];
   

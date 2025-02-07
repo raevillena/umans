@@ -82,6 +82,8 @@ User.init({
         }
       }
     }
-  });
+});
 
-  export default User;
+
+
+export default User;

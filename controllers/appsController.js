@@ -1,4 +1,4 @@
-import {Apps} from '../models/index.js';
+import {Apps, User, Roles, GoogleUser} from '../models/index.js';
 
 
 // get app list
@@ -21,6 +21,45 @@ export const getApps = async (req, res, next) => {
         //if limit is defined but lower that 0 then send invalid result
         res.status(400).send('Invalid limit');
     } catch (error) {
+        error.status = 400;
+        return next(error);
+    }
+};
+
+// get app by id
+// GET /api/apps
+export const getAppById = async (req, res, next) => {
+    try{
+        const app = await Apps.findOne({
+            where: {
+                id: req.params.id,
+                isActive: true,
+            },
+            attributes: ['id', 'name', 'ownerOffice', 'email', 'mobileNumber'],
+            include: [
+                {
+                    model: User,
+                    attributes: ['username','email'],
+                    through:{
+                        model:Roles,
+                        attributes: ['userType']
+                    },
+                    include:[
+                        {
+                            model: GoogleUser,
+                            attributes: ['googleId']
+                        },
+                    ],
+                },
+            ],
+        });
+        if(!app){
+            const error = new Error(`App with id ${req.params.id} not found`);
+            error.status = 404;
+            return next(error);
+        }
+        res.status(200).json(app);
+    }catch(error){
         error.status = 400;
         return next(error);
     }

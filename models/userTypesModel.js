@@ -1,9 +1,9 @@
 import { DataTypes, Model } from '@sequelize/core';
 import sequelize from '../config/database.js';
 
-class userTypes extends Model {}
+class UserTypes extends Model {}
 
-userTypes.init({
+UserTypes.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -25,5 +25,5 @@ userTypes.init({
     timestamps: true,
 });
 
-export default userTypes;
+export default UserTypes;
   
