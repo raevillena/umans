@@ -6,7 +6,8 @@ import { usersRoute, appsRoute, roleRoute, authRoute, googleRoute, userTypesRout
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
 import notFound from './middleware/notFound.js';
-
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
 
 //Get env from .env file
 const port = process.env.PORT || 3000;
@@ -18,9 +19,18 @@ const __dirname = path.dirname(__filename);
 //Setup express instance
 const app = express();
 
+//handle cors
+app.use(cors({
+    origin: 'http://localhost:5173',  // your frontend URL
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+
 //Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser())
 
 //Logger middleware using winston
 app.use(logger);
@@ -39,6 +49,9 @@ app.use('/api/type', userTypesRoute);
 //error handler middleware
 app.use(notFound);
 app.use(errorHandler);
+
+
+
 
 //Initialize database
 initDB();

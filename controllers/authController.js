@@ -113,6 +113,14 @@ export const superLogin = async (req, res, next) => {
         const userResponse = user.toJSON();
         delete userResponse.password;
 
+        //put the refresh token in the cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,  // Prevent JavaScript access
+            secure: true, //process.env.NODE_ENV === "production", // Use HTTPS in production
+            sameSite: "None", //Strict to same site
+            path: "/api/auth",  // Restrict cookie to auth routes
+        });
+
         res.status(200).json({
             msg: 'Login Successfull',
             user: userResponse,
@@ -150,9 +158,11 @@ export const register = async (req, res, next) => {
 // POST /api/auth/logout
 export const logout = async (req, res, next) => {
     try{
-        const { access_token, refresh_token } = req.body;
-        if (access_token) await revokeToken(access_token, 'access');
-        if (refresh_token) await revokeToken(refresh_token, 'refresh');
+        const accessToken = req.headers.authorization?.split(' ')[1];
+        const refreshToken  = req.cookies.refreshToken;
+
+        if (accessToken) await revokeToken(accessToken, 'access');
+        if (refreshToken) await revokeToken(refreshToken, 'refresh');
         res.status(200).json({ message: 'Logged out successfully' });
     }catch (error){
         error.status = 500;
@@ -164,14 +174,15 @@ export const logout = async (req, res, next) => {
 // POST /api/auth/refresh
 export const refresh = async (req, res, next) => {
     //get and check if refresh token is present, if not then return with error
-    const { refresh_token } = req.body;
-    if (!refresh_token){
+    const  refreshToken  = req.cookies.refreshToken;
+    console.log(refreshToken)
+    if (!refreshToken){
         const error = new Error('No refresh token provided');
         error.status = 400;
         return next(error);
     }
     //get token from sql database, verified if present
-    const storedToken = await verifyToken(refresh_token, 'refresh');
+    const storedToken = await verifyToken(refreshToken, 'refresh');
     //check if token is existing and not expired
     if (!storedToken || storedToken.expiresAt < new Date()) {
         const error = new Error('Invalid or expired refresh token');
@@ -183,6 +194,8 @@ export const refresh = async (req, res, next) => {
     res.status(200).json({ access_token: accessToken });
 }
 
+
+// password reset initiation
 export const requestPasswdReset = async (req, res) => {
     //get email from body
     const { email } = req.body;
@@ -211,8 +224,7 @@ export const requestPasswdReset = async (req, res) => {
     }
 };
 
-
-
+//actual password reset after token verification
 export const resetPasswd = async (req, res) => {
   const { token, newPassword } = req.body;
 

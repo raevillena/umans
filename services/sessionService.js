@@ -20,7 +20,8 @@ export const generateTokens = async (id, role, appId) => {
 
 export const verifyToken = async (token, type) => {
   if (type === 'access') {
-    return await redisClient.get(`access:${token}`);
+    const res = await JSON.parse(await redisClient.get(`access:${token}`)) || {undefined,undefined,undefined};
+    return res;
   } else if (type === 'refresh') {
     return await RefreshToken.findOne({ where: { token } });
   }
