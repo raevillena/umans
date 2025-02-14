@@ -18,9 +18,19 @@ export const generateTokens = async (id, role, appId) => {
   return { accessToken, refreshToken };
 }
 
+
+export const reGenerateAccessToken = async (id, role, appId) => {
+  const accessToken = crypto.randomBytes(32).toString('hex');
+  const accessTTL = 900; // 15 min expiry
+
+  // Store access token in Redis
+  await redisClient.set(`access:${accessToken}`, JSON.stringify({id, role, appId}), {'EX':accessTTL});
+  return { accessToken };
+}
+
 export const verifyToken = async (token, type) => {
   if (type === 'access') {
-    const res = await JSON.parse(await redisClient.get(`access:${token}`)) || {undefined,undefined,undefined};
+    const res = await JSON.parse(await redisClient.get(`access:${token}`)) || false;
     return res;
   } else if (type === 'refresh') {
     return await RefreshToken.findOne({ where: { token } });

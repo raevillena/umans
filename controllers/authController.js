@@ -1,5 +1,5 @@
 import { User, Apps, Roles } from '../models/index.js';
-import { generateTokens, revokeToken } from '../services/sessionService.js'
+import { generateTokens, revokeToken, verifyToken, reGenerateAccessToken } from '../services/sessionService.js'
 import sendEmail from '../services/emailService.js';
 
 const envResetTokenExpiry = process.env.PASSWD_RESET_TOKEN_EXPIRY || 3600000;
@@ -174,10 +174,16 @@ export const logout = async (req, res, next) => {
 // POST /api/auth/refresh
 export const refresh = async (req, res, next) => {
     //get and check if refresh token is present, if not then return with error
-    const  refreshToken  = req.cookies.refreshToken;
-    console.log(refreshToken)
+    const refreshToken  = req.cookies.refreshToken;
+    const { id, role } = req.body
+    console.log(req.body)
     if (!refreshToken){
         const error = new Error('No refresh token provided');
+        error.status = 400;
+        return next(error);
+    }
+    if (!id){
+        const error = new Error('No user defined');
         error.status = 400;
         return next(error);
     }
@@ -190,9 +196,35 @@ export const refresh = async (req, res, next) => {
         return next(error);
     }
     // Generate new access token
-    const { accessToken } = await generateTokens(storedToken.userId);
-    res.status(200).json({ access_token: accessToken });
+    const { accessToken } = await reGenerateAccessToken(id, role, 0);
+    res.status(200).json({ accessToken: accessToken });
 }
+
+// validate tokens at app refresh
+// POST /api/auth/isAuthenticated
+export const isAuthenticated = async (req, res, next) => {
+    //get and check if refresh token is present, if not then return with error
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const refreshToken  = req.cookies.refreshToken;
+
+    if (!refreshToken || !accessToken){
+        const error = new Error('No token provided');
+        error.status = 401;
+        return next(error);
+    }
+    //get token from sql database, verified if present
+    const storedToken = await verifyToken(accessToken, 'access');
+    //check if token is existing and not expired
+    console.log("storedtoken: ",storedToken)
+    if (!storedToken) {
+        const error = new Error('Session Expired');
+        error.status = 401;
+        return next(error);
+    }
+    // Generate new access token
+    res.status(200).json({ msg: "Session Valid." });
+}
+
 
 
 // password reset initiation

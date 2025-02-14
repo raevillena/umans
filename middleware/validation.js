@@ -38,12 +38,6 @@ export const validateSuperLogin = [
     body('password').notEmpty().withMessage('Password is required'),
     validateRequest
 ];
-  
-// Validation rules for refresh token
-export const validateRefreshToken = [
-    body('refresh_token').notEmpty().withMessage('Refresh token is required'),
-    validateRequest
-];
 
 export const validateChangePassword = [
     body('email').isEmail().withMessage('Invalid email format'),
