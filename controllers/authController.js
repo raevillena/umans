@@ -88,13 +88,13 @@ export const superLogin = async (req, res, next) => {
 
         if (!user) {
             const error = new Error('Invalid Credentials');
-            error.status = 401;
+            error.status = 400;
             return next(error);
         }
 
         if (user.role !== 'admin') {
             const error = new Error('Sneaky Bastard, you are not an admin.');
-            error.status = 401;
+            error.status = 400;
             return next(error);
         }
 
@@ -102,7 +102,7 @@ export const superLogin = async (req, res, next) => {
         const isValidPassword = await user.validatePassword(password);
         if (!isValidPassword) {
             const error = new Error('Validation Failed //dev mode change to real one');
-            error.status = 401;
+            error.status = 400;
             return next(error);
         }
 
@@ -127,7 +127,7 @@ export const superLogin = async (req, res, next) => {
             token: {accessToken, refreshToken}
         });
     } catch (error) {
-        error.status = 401;
+        error.status = 400;
         return next(error);
     }
 }
@@ -159,7 +159,7 @@ export const register = async (req, res, next) => {
 export const logout = async (req, res, next) => {
     try{
         const accessToken = req.headers.authorization?.split(' ')[1];
-        const refreshToken  = req.cookies.refreshToken;
+        const refreshToken  = req.cookies?.refreshToken;
 
         if (accessToken) await revokeToken(accessToken, 'access');
         if (refreshToken) await revokeToken(refreshToken, 'refresh');
@@ -173,56 +173,71 @@ export const logout = async (req, res, next) => {
 // reissue refresh token
 // POST /api/auth/refresh
 export const refresh = async (req, res, next) => {
-    //get and check if refresh token is present, if not then return with error
-    const refreshToken  = req.cookies.refreshToken;
-    const { id, role } = req.body
-    console.log(req.body)
-    if (!refreshToken){
-        const error = new Error('No refresh token provided');
-        error.status = 400;
-        return next(error);
+    try{
+        //get and check if refresh token is present, if not then return with error
+        const refreshToken  = req.cookies?.refreshToken || undefined;
+        const { id, role } = req.body
+        console.log(req.body)
+        if (!refreshToken){
+            const error = new Error('No refresh token provided');
+            error.status = 400;
+            return next(error);
+        }
+        if (!id){
+            const error = new Error('No user defined');
+            error.status = 400;
+            return next(error);
+        }
+        //get token from sql database, verified if present
+        const storedToken = await verifyToken(refreshToken, 'refresh');
+        //check if token is existing and not expired
+        if (!storedToken || storedToken.expiresAt < new Date()) {
+            const error = new Error('Invalid or expired refresh token');
+            error.status = 401;
+            return next(error);
+        }
+        // Generate new access token
+        const { accessToken } = await reGenerateAccessToken(id, role, 0);
+        res.status(200).json({ accessToken: accessToken });
+    }catch(error){
+        const error2 = new Error('error inside refresh route');
+        error2.status = 500;
+        return next(error2);
     }
-    if (!id){
-        const error = new Error('No user defined');
-        error.status = 400;
-        return next(error);
-    }
-    //get token from sql database, verified if present
-    const storedToken = await verifyToken(refreshToken, 'refresh');
-    //check if token is existing and not expired
-    if (!storedToken || storedToken.expiresAt < new Date()) {
-        const error = new Error('Invalid or expired refresh token');
-        error.status = 401;
-        return next(error);
-    }
-    // Generate new access token
-    const { accessToken } = await reGenerateAccessToken(id, role, 0);
-    res.status(200).json({ accessToken: accessToken });
+
 }
 
 // validate tokens at app refresh
 // POST /api/auth/isAuthenticated
 export const isAuthenticated = async (req, res, next) => {
-    //get and check if refresh token is present, if not then return with error
-    const accessToken = req.headers.authorization?.split(' ')[1];
-    const refreshToken  = req.cookies.refreshToken;
 
-    if (!refreshToken || !accessToken){
-        const error = new Error('No token provided');
-        error.status = 401;
-        return next(error);
+    try{
+        //get and check if refresh token is present, if not then return with error
+        const accessToken = req.headers.authorization?.split(' ')[1];
+        const refreshToken  = req.cookies?.refreshToken;
+
+        if (!refreshToken || !accessToken){
+            const error = new Error('No token provided');
+            error.status = 401;
+            return next(error);
+        }
+        //get token from sql database, verified if present
+        const storedToken = await verifyToken(accessToken, 'access');
+        //check if token is existing and not expired
+        console.log("storedtoken: ",storedToken)
+        if (!storedToken) {
+            const error = new Error('Session Expired');
+            error.status = 401;
+            return next(error);
+        }
+        // Generate new access token
+        res.status(200).json({ msg: "Session Valid." });
+    }catch(error){
+        const error2 = new Error('error inside isAuthenticated route');
+        error2.status = 500;
+        return next(error2);
     }
-    //get token from sql database, verified if present
-    const storedToken = await verifyToken(accessToken, 'access');
-    //check if token is existing and not expired
-    console.log("storedtoken: ",storedToken)
-    if (!storedToken) {
-        const error = new Error('Session Expired');
-        error.status = 401;
-        return next(error);
-    }
-    // Generate new access token
-    res.status(200).json({ msg: "Session Valid." });
+
 }
 
 
