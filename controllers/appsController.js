@@ -39,7 +39,7 @@ export const getAppById = async (req, res, next) => {
             include: [
                 {
                     model: User,
-                    attributes: ['username','email'],
+                    attributes: ['email', 'role', 'office','mobileNo'],
                     through:{
                         model:Roles,
                         attributes: ['userType']
