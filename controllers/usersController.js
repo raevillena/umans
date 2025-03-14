@@ -21,16 +21,16 @@ export const getUsers = async (req, res, next) => {
     }
 };
 
-// get user by username
-// GET /api/users/:username
-export const getUserByUsername = async (req, res, next) => {
+// get user by email
+// GET /api/users/:email
+export const getUserByEmail = async (req, res, next) => {
     try{
         const user = await User.findOne({
             where: {
-                username: req.params.username,
+                email: req.params.email,
                 isActive: true,
             },
-            attributes: ['id', 'username', 'email', 'role', 'mobileNo'],
+            attributes: ['id', 'email', 'role', 'office','mobileNo'],
             include: [
                 {
                     model: Apps,
@@ -47,7 +47,7 @@ export const getUserByUsername = async (req, res, next) => {
             ],
         });
         if(!user){
-            const error = new Error(`User with id ${req.params.username} not found`);
+            const error = new Error(`User with id ${req.params.email} not found`);
             error.status = 404;
             return next(error);
         }

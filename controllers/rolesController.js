@@ -27,7 +27,6 @@ export const addRole = async (req, res, next) => {
 
     try {
         const role = await Roles.create(req.body);
-        console.log(role)
         res.status(201).json(role);
     } catch (error) {
         //const error2 = new Error('creating a user failed');

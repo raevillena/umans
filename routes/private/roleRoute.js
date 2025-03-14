@@ -12,7 +12,7 @@ router.post('/', authenticateAdmin, addRole);
 //Update user by id
 router.put('/:id', authenticateAdmin, updateRole);
 
-//Delete user by id/username
+//Delete user by id
 router.delete('/:id', authenticateAdmin, deleteRole);
 
 

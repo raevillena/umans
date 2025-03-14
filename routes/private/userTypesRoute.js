@@ -9,7 +9,7 @@ router.get('/', authenticateAdmin, getUserTypes);
 //POST new user /create new user
 router.post('/', authenticateAdmin, addUserType);
 
-//Delete user by id/username
+//Delete user by id/email
 router.delete('/:id', authenticateAdmin, deleteUserType);
 
 export default router;

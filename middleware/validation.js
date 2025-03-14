@@ -18,9 +18,10 @@ export const validateRegister = [
         .matches(/[A-Z]/).withMessage('Password must have at least one uppercase letter')
         .matches(/[a-z]/).withMessage('Password must have at least one lowercase letter')
         .matches(/\d/).withMessage('Password must have at least one number'),
-    body('username').trim().notEmpty().withMessage('Username is required'),
-    body('firstName').trim().notEmpty().withMessage('Firstname is required'),
-    body('lastName').trim().notEmpty().withMessage('Lastname is required'),
+    body('office').trim().notEmpty().withMessage('Office is required'),
+    body('firstName').trim().notEmpty().withMessage('First name is required'),
+    body('lastName').trim().notEmpty().withMessage('Last name is required'),
+    body('mobileNo').trim().notEmpty().withMessage('Mobile number is required'),
     validateRequest
 ];
   

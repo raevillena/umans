@@ -25,7 +25,6 @@ const authenticateUser = async (req, res, next) => {
         return next();
     }
 
-    console.log("role", role)
     const error = new Error('Alien Detected');
     error.status = 401;
     return next(error);
@@ -68,7 +67,6 @@ const authenticateAdmin = async (req, res, next) => {
         return next(error);
     }
 
-    console.log("role", role)
     const error = new Error('Alien Detected');
     error.status = 401;
     return next(error);

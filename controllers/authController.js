@@ -7,7 +7,6 @@ const apiUrl = process.env.API_URL || 'localhost:3001';
 
 export const login = async (req, res, next) => {
     const { email, password, appId } = req.body;
-    console.log(req.body);
     try {
         const user = await User.findOne({ 
             where: {
@@ -136,8 +135,8 @@ export const superLogin = async (req, res, next) => {
 // create new user
 // POST /api/users
 export const register = async (req, res, next) => {
-    if(!req.body.username){
-        const error = new Error('Please include a name');
+    if(!req.body.email){
+        const error = new Error('Please include email');
         error.status = 400;
         return next(error);
     }
@@ -177,7 +176,6 @@ export const refresh = async (req, res, next) => {
         //get and check if refresh token is present, if not then return with error
         const refreshToken  = req.cookies?.refreshToken || undefined;
         const { id, role } = req.body
-        console.log(req.body)
         if (!refreshToken){
             const error = new Error('No refresh token provided');
             error.status = 400;
@@ -224,7 +222,6 @@ export const isAuthenticated = async (req, res, next) => {
         //get token from sql database, verified if present
         const storedToken = await verifyToken(accessToken, 'access');
         //check if token is existing and not expired
-        console.log("storedtoken: ",storedToken)
         if (!storedToken) {
             const error = new Error('Session Expired');
             error.status = 401;
