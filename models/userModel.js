@@ -24,7 +24,7 @@ User.init({
     },
     office: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     firstName: {
       type: DataTypes.STRING,

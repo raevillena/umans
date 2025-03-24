@@ -62,6 +62,7 @@ export const login = async (req, res, next) => {
 //super Login route
 export const superLogin = async (req, res, next) => {
     const { email, password } = req.body;
+    console.log(req.body);
     try {
         const user = await User.findOne({ 
             where: {
@@ -84,8 +85,25 @@ export const superLogin = async (req, res, next) => {
             ]
             
         });
-
+        console.log(user);
         if (!user) {
+            try{
+                const user = await User.findOne({ 
+                    where: {
+                        email: email,
+                        isActive: true
+                    },
+                    attributes: ['email']                    
+                });
+                if (user) {
+                    const error = new Error('User has been created but not assigned to any app, please contact administator.');
+                    error.status = 400;
+                    return next(error);
+                }
+            }catch(error){
+                error.status = 400;
+                return next(error);
+            }
             const error = new Error('Invalid Credentials');
             error.status = 400;
             return next(error);
@@ -100,7 +118,7 @@ export const superLogin = async (req, res, next) => {
         // Validate password, check password if matched when unhashed
         const isValidPassword = await user.validatePassword(password);
         if (!isValidPassword) {
-            const error = new Error('Validation Failed //dev mode change to real one');
+            const error = new Error('Wrong password //change this later');
             error.status = 400;
             return next(error);
         }
@@ -135,6 +153,7 @@ export const superLogin = async (req, res, next) => {
 // create new user
 // POST /api/users
 export const register = async (req, res, next) => {
+    console.log(req.body)
     if(!req.body.email){
         const error = new Error('Please include email');
         error.status = 400;
@@ -148,7 +167,8 @@ export const register = async (req, res, next) => {
         res.status(201).json(userResponse);
     } catch (error) {
         //const error2 = new Error('creating a user failed');
-        error.status = 400;
+        error.status = 402;
+        console.log(error.errors);
         return next(error);
     }
 }
