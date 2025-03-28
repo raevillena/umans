@@ -7,7 +7,7 @@ export const getUsers = async (req, res, next) => {
     try {
         const limit = parseInt(req.query.limit)
         if(isNaN(limit)) {
-            const users = await User.findAll({where:{isActive: true}});
+            const users = await User.findAll();
             return res.send(users);
         }
         if(!isNaN(limit) && limit > 0) {

@@ -62,7 +62,6 @@ export const login = async (req, res, next) => {
 //super Login route
 export const superLogin = async (req, res, next) => {
     const { email, password } = req.body;
-    console.log(req.body);
     try {
         const user = await User.findOne({ 
             where: {
