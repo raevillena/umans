@@ -84,7 +84,6 @@ export const superLogin = async (req, res, next) => {
             ]
             
         });
-        console.log(user);
         if (!user) {
             try{
                 const user = await User.findOne({ 
