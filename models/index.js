@@ -6,7 +6,8 @@ import Roles from './rolesModel.js';
 import RefreshToken from './refreshTokenModel.js';
 import GoogleUser from './googleModel.js';
 import UserTypes from './userTypesModel.js';
-
+import Mqtt from './mqttModel.js';
+import ActionLog from './logsModel.js';
 
 Apps.belongsToMany(User, { through: Roles });
 User.belongsToMany(Apps, { through: Roles});
@@ -20,6 +21,18 @@ GoogleUser.belongsTo(User, {
     targetKey: 'email'
 });
 
+User.hasOne(Mqtt, {
+    foreignKey: 'email',
+    sourceKey: 'email'
+});
+Mqtt.belongsTo(User, {
+    foreignKey: 'email',
+    targetKey: 'email'
+});
+
+ActionLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+
 export const initDB = async () => {
     try {
         await sequelize.authenticate();
@@ -32,5 +45,5 @@ export const initDB = async () => {
 };
 
 export {
-    User, Apps, Roles, RefreshToken, GoogleUser, UserTypes
+    User, Apps, Roles, RefreshToken, GoogleUser, UserTypes, Mqtt, ActionLog
 }

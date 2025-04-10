@@ -1,5 +1,5 @@
 import {UserTypes} from '../models/index.js';
-
+import { logAction } from '../services/loggerService.js';
 
 // get user types list
 // GET /api/UserTypes
@@ -33,18 +33,64 @@ export const addUserType = async (req, res, next) => {
     }
 }
 
+// update app by id
+// PUT /api/apps/:id
+
+export const updateType = async (req, res, next) => {
+    try{
+        const requestorID = req.headers['x-user-id'];
+        const type = await UserTypes.findByPk(req.params.id);
+        if(!type){
+            const error = new Error(`Type with id ${req.params.id} not found`);
+            error.status = 404;
+            return next(error);
+        }
+        await type.update(req.body);
+
+        // Log the action
+        await logAction({
+            action: 'Update User Type',
+            details: JSON.stringify(type),
+            userId: requestorID,
+            targetId: req.params.id,
+            targetType: 'User Type',
+            ipAddress: req.ip,
+        });
+
+        // Send the response
+        res.status(200).json(type);
+    }catch(error){
+        error.status = 400;
+        return next(error);
+    }
+
+}
+
+
 // Delete app by id
 // PUT /api/apps/:id
 
 export const deleteUserType = async (req, res, next) => {
     try{
         const type = await UserTypes.findByPk(req.params.id);
+        const requestorID = req.headers['x-user-id'];
         if(!type){
             const error = new Error(`User type with id ${req.params.id} not found`);
             error.status = 404;
             return next(error);
         }
         await type.destroy();
+
+        // Log the action
+        await logAction({
+            action: 'Delete User Type',
+            details: JSON.stringify(type),
+            userId: requestorID,
+            targetId: req.params.id,
+            targetType: 'User Type',
+            ipAddress: req.ip,
+        });
+
         res.status(200).json({msg: 'User type deleted permanently'});
     }catch(error){
         error.status = 400;

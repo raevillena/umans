@@ -1,5 +1,6 @@
 // Description: All user related routes are defined here
 import {User, Apps, GoogleUser, Roles, UserTypes} from '../models/index.js';
+import { logAction } from '../services/loggerService.js';
 
 // get all users
 // GET /api/users
@@ -64,6 +65,8 @@ export const getUserByEmail = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
     try{
+        
+        const requestorID = req.headers['x-user-id'];
         const user = await User.findByPk(req.params.id);
         if(!user){
             const error = new Error(`User with id ${req.params.id} not found`);
@@ -71,6 +74,17 @@ export const updateUser = async (req, res, next) => {
             return next(error);
         }
         await user.update(req.body);
+
+        // Log the action
+        await logAction({
+            action: 'Update User',
+            details: JSON.stringify(req.body),
+            userId: requestorID,
+            targetId: req.params.id,
+            targetType: 'User',
+            ipAddress: req.ip,
+        });
+
         res.status(200).json(user);
     }catch(error){
         error.status = 400;
@@ -83,46 +97,32 @@ export const updateUser = async (req, res, next) => {
 
 export const changePassword = async (req, res, next) => {
 
-  const { email, newPassword } = req.body;
-  try {
-    // Check if user exists
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Update password (Sequelize hook will hash it automatically)
-    await user.update({ password: newPassword });
-
-    return res.status(200).json({ message: 'Password changed successfully' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-}
-
-// update user by id
-// PUT /api/users/:id
-export const updatePermissions = async (req, res, next) => {
-    try{
-        const user = await User.findByPk(req.params.id, {
-            include: [
-                {
-                    model: Apps
-                }
-            ]
-        });
-        if(!user){
-            const error = new Error(`User with id ${req.params.id} not found`);
-            error.status = 404;
-            return next(error);
+    const { email, newPassword } = req.body;
+    const requestorID = req.headers['x-user-id'];
+    try {
+        // Check if user exists
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+        return res.status(404).json({ message: 'User not found' });
         }
-        await user.update(req.body);
-        res.status(200).json(user);
-    }catch(error){
-        error.status = 400;
-        return next(error);
-    }
 
+        // Update password (Sequelize hook will hash it automatically)
+        await user.update({ password: newPassword });
+
+        // Log the action
+        await logAction({
+            action: 'Change Password',
+            details: email,
+            userId: requestorID,
+            targetId: req.params.id,
+            targetType: 'User',
+            ipAddress: req.ip,
+        });
+
+        return res.status(200).json({ message: 'Password changed successfully' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 }
 
 
@@ -132,6 +132,7 @@ export const updatePermissions = async (req, res, next) => {
 
 export const deleteUser = async (req, res, next) => {
     try{
+        const requestorID = req.headers['x-user-id'];
         const user = await User.findByPk(req.params.id);
         if(!user){
             const error = new Error(`User with id ${req.params.id} not found`);
@@ -139,6 +140,17 @@ export const deleteUser = async (req, res, next) => {
             return next(error);
         }
         await user.destroy();
+
+        // Log the action
+        await logAction({
+            action: 'Delete User',
+            details: JSON.stringify(user),
+            userId: requestorID,
+            targetId: req.params.id,
+            targetType: 'User',
+            ipAddress: req.ip,
+          });
+
         res.status(200).json({msg:'User deleted permanently'});
     }catch(error){
         error.status = 400;

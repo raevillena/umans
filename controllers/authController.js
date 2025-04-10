@@ -1,6 +1,7 @@
 import { User, Apps, Roles } from '../models/index.js';
 import { generateTokens, revokeToken, verifyToken, reGenerateAccessToken } from '../services/sessionService.js'
 import sendEmail from '../services/emailService.js';
+import { logAction } from '../services/loggerService.js';
 
 const envResetTokenExpiry = process.env.PASSWD_RESET_TOKEN_EXPIRY || 3600000;
 const apiUrl = process.env.API_URL || 'localhost:3001';
@@ -62,6 +63,7 @@ export const login = async (req, res, next) => {
 //super Login route
 export const superLogin = async (req, res, next) => {
     const { email, password } = req.body;
+    const requestorID = req.headers['x-user-id'] || req.body.id || 1; // Default to 1 if not provided
     try {
         const user = await User.findOne({ 
             where: {
@@ -108,6 +110,15 @@ export const superLogin = async (req, res, next) => {
         }
 
         if (user.role !== 'admin') {
+            // Log the action
+            await logAction({
+                action: 'Login Attempt Failed',
+                details: JSON.stringify(req.body),
+                userId: requestorID, //requestor id needs to be existing user id in the users table
+                targetId: 0,
+                targetType: 'User',
+                ipAddress: req.ip,
+            });
             const error = new Error('Sneaky Bastard, you are not an admin.');
             error.status = 400;
             return next(error);
@@ -136,6 +147,16 @@ export const superLogin = async (req, res, next) => {
             path: "/api/auth",  // Restrict cookie to auth routes
         });
 
+        // Log the action
+        await logAction({
+            action: 'Super Login',
+            details: JSON.stringify(userResponse),
+            userId: user.id, //requestor id needs to be existing user id in the users table
+            targetId: userResponse.id,
+            targetType: 'User',
+            ipAddress: req.ip,
+        });
+
         res.status(200).json({
             msg: 'Login Successfull',
             user: userResponse,
@@ -162,6 +183,17 @@ export const register = async (req, res, next) => {
         const user = await User.create(req.body);
         const userResponse = user.toJSON();
         delete userResponse.password;
+
+        // Log the action
+        await logAction({
+            action: 'Create User',
+            details: JSON.stringify(userResponse),
+            userId: userResponse.id, //needs to be existing user id in the users table
+            targetId: userResponse.id,
+            targetType: 'User',
+            ipAddress: req.ip,
+        });
+
         res.status(201).json(userResponse);
     } catch (error) {
         //const error2 = new Error('creating a user failed');
@@ -304,6 +336,16 @@ export const resetPasswd = async (req, res) => {
       password: newPassword, // Sequelize hooks will hash it
       resetToken: null,
       resetTokenExpiry: null
+    });
+
+    // Log the action
+    await logAction({
+        action: 'Password Reset',
+        details: JSON.stringify(user),
+        userId: 1, //needs to be existing user id in the users table
+        targetId: user.id,
+        targetType: 'User',
+        ipAddress: req.ip,
     });
 
     return res.status(200).json({ message: 'Password reset successfully' });
