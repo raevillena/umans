@@ -14,7 +14,7 @@ export const login = async (req, res, next) => {
                 email: email,
                 isActive: true
             },
-            attributes: ['id', 'email', 'password', 'role'],
+            attributes: ['id', 'email', 'password', 'role','mobileNo', 'firstName', 'lastName', 'avatar'],
             include: [  
                 {
                     model: Apps,
@@ -70,7 +70,7 @@ export const superLogin = async (req, res, next) => {
                 email: email,
                 isActive: true
             },
-            attributes: ['id', 'email', 'password', 'role'],
+            attributes: ['id', 'email', 'password', 'role', 'mobileNo', 'firstName', 'lastName', 'avatar'],
             include: [  
                 {
                     model: Apps,
