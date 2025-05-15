@@ -14,7 +14,7 @@ router.get('/isAuthenticated',  isAuthenticated);
 
 /**
  * @openapi
- * /users:
+ * /auth/register:
  *   post:
  *     summary: Create a new user
  *     requestBody:
