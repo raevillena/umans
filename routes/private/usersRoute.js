@@ -4,10 +4,32 @@ import { getUsers, getUserByEmail, updateUser, deleteUser, changePassword } from
 import { authenticateAdmin } from '../../middleware/auth.js';
 import { validateChangePassword } from '../../middleware/validation.js';
 
-//GET all users
+/**
+ * @openapi
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     responses:
+ *       200:
+ *         description: A list of users
+ */
 router.get('/', authenticateAdmin, getUsers);
 
-//GET user by id/email
+/**
+ * @openapi
+ * /api/users/{email}:
+ *   get:
+ *     summary: Get a user by Email
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A single user
+ */
 router.get('/:email', authenticateAdmin, getUserByEmail);
 
 //Update user by id

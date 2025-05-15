@@ -12,7 +12,24 @@ router.post('/superLogin', validateSuperLogin, superLogin);
 //GET isAuthenticated
 router.get('/isAuthenticated',  isAuthenticated);
 
-//POST new user /create new user
+/**
+ * @openapi
+ * /users:
+ *   post:
+ *     summary: Create a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created
+ */
 router.post('/register', validateRegister, register);
 
 //POST logout

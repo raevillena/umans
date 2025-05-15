@@ -8,20 +8,27 @@ import errorHandler from './middleware/error.js';
 import notFound from './middleware/notFound.js';
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
 
 //Get env from .env file
 const port = process.env.PORT || 3000;
+const api_url = process.env.API_URL
 const debug = process.env.DEBUG === 'true'
 const allowedOrigins = debug
-  ? process.env.ALLOWED_ORIGINS_PROD?.split(',').map(origin => origin.trim())
-  : process.env.ALLOWED_ORIGINS_DEV
-
+  ? process.env.ALLOWED_ORIGINS_DEV
+  : process.env.ALLOWED_ORIGINS_PROD?.split(',').map(origin => origin.trim())
+  
 //Setup directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 //Setup express instance
 const app = express();
+
+//peek the allowed origins
+console.log(allowedOrigins)
 
 //handle cors
 app.use(cors({
@@ -47,6 +54,28 @@ app.use(logger);
 //setup static and folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Swagger definition
+const swaggerSpec = swaggerJsdoc({
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'UMANS API',
+      version: '1.0.0',
+      description: 'User Management & Authentication API',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3001',
+        description: 'Development server',
+      },
+    ],
+  },
+  apis: ['./routes/**/*.js'], // JSDoc annotated files
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
 //Routes
 app.use('/api/users', usersRoute);
 app.use('/api/apps', appsRoute);
@@ -68,4 +97,5 @@ initDB();
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+    console.log(`Swagger docs at ${api_url}:${port}/api-docs`);
 });
