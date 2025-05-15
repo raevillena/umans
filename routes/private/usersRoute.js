@@ -14,7 +14,7 @@ router.get('/:email', authenticateAdmin, getUserByEmail);
 router.put('/:id', authenticateAdmin, updateUser);
 
 //Update user by id
-router.post('/passwd-change', [authenticateAdmin, validateChangePassword], changePassword);
+router.put('/passwd-change/:id', [authenticateAdmin, validateChangePassword], changePassword);
 
 //Delete user by id/email
 router.delete('/:id', authenticateAdmin, deleteUser);

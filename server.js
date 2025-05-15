@@ -11,6 +11,10 @@ import cookieParser from 'cookie-parser'
 
 //Get env from .env file
 const port = process.env.PORT || 3000;
+const debug = process.env.DEBUG === 'true'
+const allowedOrigins = debug
+  ? process.env.ALLOWED_ORIGINS_PROD?.split(',').map(origin => origin.trim())
+  : process.env.ALLOWED_ORIGINS_DEV
 
 //Setup directory
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +25,12 @@ const app = express();
 
 //handle cors
 app.use(cors({
-    origin: 'http://localhost:5173',  // your frontend URL
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
@@ -52,8 +61,6 @@ app.use('/api/logs', logsRoute);
 //error handler middleware
 app.use(notFound);
 app.use(errorHandler);
-
-
 
 
 //Initialize database

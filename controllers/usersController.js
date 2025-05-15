@@ -2,6 +2,7 @@
 import {User, Apps, GoogleUser, Roles, UserTypes} from '../models/index.js';
 import { logAction } from '../services/loggerService.js';
 
+
 // get all users
 // GET /api/users
 export const getUsers = async (req, res, next) => {
@@ -97,7 +98,7 @@ export const updateUser = async (req, res, next) => {
 
 export const changePassword = async (req, res, next) => {
 
-    const { email, newPassword } = req.body;
+    const { email, password, newPassword } = req.body;
     const requestorID = req.headers['x-user-id'];
     try {
         // Check if user exists
@@ -106,20 +107,28 @@ export const changePassword = async (req, res, next) => {
         return res.status(404).json({ message: 'User not found' });
         }
 
+        // Validate password, check password if matched when unhashed
+        const isValidPassword = await user.validatePassword(password);
+        if (!isValidPassword) {
+            const error = new Error('Wrong password //change this later');
+            error.status = 400;
+            return next(error);
+        }
+
         // Update password (Sequelize hook will hash it automatically)
         await user.update({ password: newPassword });
 
         // Log the action
         await logAction({
             action: 'Change Password',
-            details: email,
+            details: JSON.stringify(email),
             userId: requestorID,
             targetId: req.params.id,
             targetType: 'User',
             ipAddress: req.ip,
         });
 
-        return res.status(200).json({ message: 'Password changed successfully' });
+        return res.status(200).json({success:"ok"});
     } catch (error) {
         return res.status(500).json({ message: 'Internal server error' });
     }

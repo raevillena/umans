@@ -59,7 +59,7 @@ User.init({
       allowNull: true,
     },
     resetTokenExpiry: {
-      type: DataTypes.STRING,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     isActive: {

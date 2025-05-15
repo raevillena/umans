@@ -1,10 +1,15 @@
+//some libraries for generation
+import crypto from 'crypto';
+import { Op } from '@sequelize/core';
+
 import { User, Apps, Roles } from '../models/index.js';
 import { generateTokens, revokeToken, verifyToken, reGenerateAccessToken } from '../services/sessionService.js'
 import sendEmail from '../services/emailService.js';
 import { logAction } from '../services/loggerService.js';
 
-const envResetTokenExpiry = process.env.PASSWD_RESET_TOKEN_EXPIRY || 3600000;
+const envResetTokenExpiry = Number(process.env.PASSWD_RESET_TOKEN_EXPIRY) || 3600000;
 const apiUrl = process.env.API_URL || 'localhost:3001';
+const domainUrl = process.env.DOMAIN_URL || 'localhost:3001';
 
 export const login = async (req, res, next) => {
     const { email, password, appId } = req.body;
@@ -308,10 +313,10 @@ export const requestPasswdReset = async (req, res) => {
       await user.update({ resetToken, resetTokenExpiry });
 
       // Send the reset email
-      const resetLink = `${apiUrl}/reset-password/${resetToken}`; //send page of password reset instead this one is direct to the api 
+      const resetLink = `${domainUrl}/reset-password/${resetToken}`; //send page of password reset instead this one is direct to the api 
       await sendEmail(user.email, 'Password Reset Request', `Click this link to reset your password: ${resetLink}`);
 
-      return res.status(200).json({ message: 'Password reset link sent to email' });
+      return res.status(200).json({ email: user.email, token: resetToken });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Internal server error' });
@@ -338,10 +343,14 @@ export const resetPasswd = async (req, res) => {
       resetTokenExpiry: null
     });
 
+    // Remove password from response
+    const userResponse = user.toJSON();
+    delete userResponse.password;
+
     // Log the action
     await logAction({
         action: 'Password Reset',
-        details: JSON.stringify(user),
+        details: JSON.stringify(userResponse),
         userId: 1, //needs to be existing user id in the users table
         targetId: user.id,
         targetType: 'User',

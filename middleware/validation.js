@@ -42,6 +42,7 @@ export const validateSuperLogin = [
 
 export const validateChangePassword = [
     body('email').isEmail().withMessage('Invalid email format'),
+    body('password').notEmpty().withMessage('Password is required'),
     body('newPassword')
         .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
         .matches(/[A-Z]/).withMessage('Password must have at least one uppercase letter')
