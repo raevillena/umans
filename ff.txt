@@ -1,0 +1,26 @@
+# Generate CA private key
+sudo openssl genrsa 2048 > ca-key.pem
+
+# Generate CA certificate
+sudo openssl req -new -x509 -nodes -days 3600 -key ca-key.pem -out ca-cert.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=MariaDB-CA"
+
+# Generate server private key and certificate request
+sudo openssl req -newkey rsa:2048 -days 3600 -nodes -keyout server-key.pem -out server-req.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=10.10.30.102"
+
+# Remove passphrase from server key
+sudo openssl rsa -in server-key.pem -out server-key.pem
+
+# Generate server certificate
+sudo openssl x509 -req -in server-req.pem -days 3600 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 -out server-cert.pem
+
+# Generate client private key and certificate request
+sudo openssl req -newkey rsa:2048 -days 3600 -nodes -keyout client-key.pem -out client-req.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=client"
+    
+# Remove passphrase from client key
+sudo openssl rsa -in client-key.pem -out client-key.pem
+
+# Generate client certificate
+sudo openssl x509 -req -in client-req.pem -days 3600 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem
+
+# Clean up certificate requests
+sudo rm server-req.pem client-req.pem

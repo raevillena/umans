@@ -1,0 +1,114 @@
+BACKEND MILESTONES
+Goal: Build a secure, documented RESTful API with authentication, session management, and RBAC. Test endpoints using Postman.
+
+ 1. Environment & Setup
+    - Initialize Node.js project with ES module support
+    - Set up Express server
+    - Configure environment variables (.env)
+    - Connect to MariaDB using Sequelize
+    - Set up Redis client for session handling
+    - Enable CORS and cookie parsing
+    - Create folder structure (/src with config, models, routes, controllers, etc.)
+
+ 2. Database Modeling (Sequelize v7)
+    - Define models:
+    - User
+    - GoogleUser
+    - Post
+    - Set up associations:
+    - User ↔ GoogleUser (1:1)
+    - User ↔ Posts (1:M)
+    - Initialize Sequelize CLI (optional migrations/seeds)
+
+ 3. Auth & Session Logic
+    - Implement registration and login with hashed passwords (bcrypt)
+    - Implement Redis session-based authentication
+    - Implement refresh token strategy (stored in DB or in-memory)
+    - Role-based access control (Admin/User)
+    - CSRF protection and secure cookie settings
+    - Google OAuth2 login via google-auth-library
+    - Test endpoints in Postman:
+        POST /auth/register
+        POST /auth/login
+        GET /auth/me
+        POST /auth/google
+        POST /auth/logout
+        Token refresh test case
+        Invalid login scenarios
+
+ 4. User & Post Features
+    - CRUD endpoints for Users
+    - CRUD endpoints for Posts (User-owned)
+    - Paginated GET endpoints
+    - Soft delete / deactivate user
+    - Protected routes (middleware-based RBAC)
+    - Postman Tests:
+        User create/edit/delete
+        Admin-only access tests
+        User-post relationships test
+
+ 5. Email & Token Utilities
+    - Setup Nodemailer transporter
+    - Send email on registration or password reset
+    - Implement one-time tokens (e.g., password reset)
+
+ 6. API Docs & Testing
+    - Add Swagger JSDoc annotations
+    - Serve Swagger UI at /api-docs
+    - Create Postman Collection with:
+    - Auth tests
+        User CRUD
+        Post CRUD
+        Token refresh
+        RBAC check
+
+FRONTEND MILESTONES
+Goal: Build a responsive React-based UI using MUI, with secure auth, state management, and RBAC-based layouts.
+
+ 1. Environment & Setup
+    - Initialize React app with Vite
+    - Set up folder structure (/api, /store, /pages, etc.)
+    - Install dependencies (MUI, React Router, Redux Toolkit, Axios, etc.)
+    - Configure MUI theme
+    - Set up Redux store and slices (authSlice, userSlice)
+
+ 2. Auth UI & Session Handling
+    - Create Login and Register pages
+    - Handle cookie-based session with secure flags
+    - Implement refresh token logic on 401 responses
+    - Add Google login button with @react-oauth/google
+    - Backend Integration via Axios
+        /auth/login
+        /auth/register
+        /auth/me
+        /auth/logout
+        Token refresh
+
+ 3. RBAC and Routing
+    - Implement ProtectedRoute component
+    - Create role-based layouts:
+        AdminLayout
+        UserLayout
+    - Configure react-router-dom routes accordingly
+
+ 4. Dashboard & Data Display
+    - Admin Dashboard:
+        User management table
+        Post overview
+    - User Dashboard:
+        My profile
+        My posts (CRUD)
+    - Integrate charts with react-chartjs-2
+
+ 5. UI & UX Enhancements
+    - Snackbar/toast notifications for API feedback
+    - Loading indicators during fetch calls
+    - Form validation using Yup or Zod
+    - Responsive layout using MUI Grid v2
+ 
+ 6. Finalization
+    - Role-specific navigation (Sidebar/Navbar)
+    - Global Axios error handling
+    - Dark/light theme toggle (optional)
+    - Environment config for API base URL
+    - Production build (vite build)

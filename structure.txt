@@ -1,0 +1,64 @@
+## Backend Tech Stack Review
+1️ Core Framework & Runtime
+    - Node.js (ESM) – Modern JavaScript runtime with native ES modules enabled.
+    - Express.js (v4.21.2) – Lightweight and flexible web framework.
+
+2️ Database & ORM
+    - MariaDB – Primary SQL database for persistent storage.
+    - Sequelize v7 (with @sequelize/mariadb) – Promise-based ORM for modeling, querying, and migrations.
+    - Sequelize CLI (v6.6.2) – For generating models, migrations, and seeders.
+
+3️ Authentication & Security
+    - bcrypt (v5.1.1) – Secure password hashing.
+    - Redis (v4.7.0) – In-memory session store (used for session-based authentication).
+    - Cookie-Parser – Parses and signs secure cookies.
+    - Google Auth Library – For handling Google OAuth2 authentication logic.
+    - express-validator – Middleware for validating and sanitizing request inputs.
+    - CORS (v2.8.5) – Cross-Origin Resource Sharing configuration for frontend-backend integration.
+
+4️ Email & Notifications
+    - Nodemailer (v6.10.0) – Sending transactional emails (e.g., password resets, verification).
+
+5️ API Documentation
+    - swagger-jsdoc (v6.2.8) – Generates Swagger/OpenAPI docs from JSDoc comments.
+    - swagger-ui-express (v5.0.1) – Serves interactive API documentation at runtime.
+
+6️ Project Structure (Recommended Layout)
+
+/src
+  /config         → Configuration files (db, Redis, CORS, env)
+    ├── db.js           # Sequelize DB instance
+    ├── redis.js        # Redis client setup
+    ├── mail.js         # Nodemailer transport
+  /controllers     → Route logic controllers
+    ├── authController.js
+    ├── userController.js
+  /middlewares     → Custom Express middlewares
+    ├── authMiddleware.js       # RBAC/session protection
+    ├── validateRequest.js      # express-validator helper
+  /models          → Sequelize models
+    ├── User.js
+    ├── GoogleUser.js
+    ├── Post.js
+    ├── index.js                # Sequelize init
+  /routes          → Express routes
+    ├── authRoutes.js
+    ├── userRoutes.js
+    ├── postRoutes.js
+  /services        → Business logic (email, token handling)
+    ├── tokenService.js
+    ├── mailService.js
+  /utils           → Helper utilities
+    ├── generateToken.js
+    ├── hashPassword.js
+    ├── logger.js
+  /docs            → Swagger config
+    ├── swaggerSpec.js
+
+server.js          → Entry point, sets up Express app
+.env               → Environment variables
+
+7️ Dev & Runtime Scripts
+
+    - npm run dev – Start server in development mode (with --watch).
+    - npm start – Start server with environment variables from .env.
