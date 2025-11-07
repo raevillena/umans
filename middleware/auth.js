@@ -1,4 +1,4 @@
-import redisClient from "../config/redis.js";
+
 import { verifyToken } from '../services/sessionService.js'
 
 const authenticateUser = async (req, res, next) => {
